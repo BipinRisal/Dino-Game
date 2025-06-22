@@ -1,5 +1,6 @@
 import random
 import pygame
+import os
 pygame.init()
 pygame.mixer.init()
 
@@ -9,42 +10,42 @@ DEATH_COUNT = 0
 SCREEN_HEIGHT = 700
 SCREEN_WIDTH = 1100
 
-JUMP_SOUND = pygame.mixer.Sound("audio\\jump.mp3")
-DEATH_SOUND = pygame.mixer.Sound("audio\\die.mp3")
-POINT_SOUND = pygame.mixer.Sound("audio\\point.mp3")
+JUMP_SOUND = pygame.mixer.Sound(os.path.join("audio","jump.mp3"))
+DEATH_SOUND = pygame.mixer.Sound(os.path.join("audio","die.mp3"))
+POINT_SOUND = pygame.mixer.Sound(os.path.join("audio","point.mp3"))
 
-icon = pygame.image.load("images\\Dino\\DinoStart.png")
+icon = pygame.image.load(os.path.join("images","Dino","DinoStart.png"))
 pygame.display.set_icon(icon)
 pygame.display.set_caption("Dino Game")
 
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 
-RUNNING = [pygame.image.load("images\\Dino\\DinoRun1.png"),pygame.image.load("images\\Dino\\DinoRun2.png")]
+RUNNING = [pygame.image.load(os.path.join("images","Dino","DinoRun1.png")),pygame.image.load(os.path.join("images","Dino","DinoRun2.png"))]
 
-JUMPING = [pygame.image.load("images\\Dino\\DinoJump.png")]
+JUMPING = [pygame.image.load(os.path.join("images","Dino","DinoJump.png"))]
 
-DUCKING = [pygame.image.load("images\\Dino\\DinoDuck1.png"),pygame.image.load("images\\Dino\\DinoDuck2.png")]
+DUCKING = [pygame.image.load(os.path.join("images","Dino","DinoDuck1.png")),pygame.image.load(os.path.join("images","Dino","DinoDuck2.png"))]
 
-DEAD = [pygame.image.load("images\\Dino\\DinoDead.png")]
+DEAD = [pygame.image.load(os.path.join("images","Dino","DinoDead.png"))]
 
-SMALL_CACTUS = [pygame.image.load("images\\Cactus\\SmallCactus1.png"),
-                pygame.image.load("images\\Cactus\\SmallCactus2.png"),
-                pygame.image.load("images\\Cactus\\SmallCactus3.png")]
+SMALL_CACTUS = [pygame.image.load(os.path.join("images","Cactus","SmallCactus1.png")),
+                pygame.image.load(os.path.join("images","Cactus","SmallCactus2.png")),
+                pygame.image.load(os.path.join("images","Cactus","SmallCactus3.png"))]
 
-LARGE_CACTUS = [pygame.image.load("images\\Cactus\\LargeCactus1.png"),
-                pygame.image.load("images\\Cactus\\LargeCactus2.png"),
-                pygame.image.load("images\\Cactus\\LargeCactus3.png")]
+LARGE_CACTUS = [pygame.image.load(os.path.join("images","Cactus","LargeCactus1.png")),
+                pygame.image.load(os.path.join("images","Cactus","LargeCactus2.png")),
+                pygame.image.load(os.path.join("images","Cactus","LargeCactus3.png"))]
 
-BIRD = [pygame.image.load("images\\Bird\\Bird1.png"),
-        pygame.image.load("images\\Bird\\Bird2.png")]
+BIRD = [pygame.image.load(os.path.join("images","Bird","Bird1.png")),
+        pygame.image.load(os.path.join("images","Bird","Bird2.png"))]
 
-CLOUD = pygame.image.load("images\\Other\\Cloud.png")
+CLOUD = pygame.image.load(os.path.join("images","Other","Cloud.png"))
 
-TRACK = pygame.image.load("images\\Other\\Track.png")
+TRACK = pygame.image.load(os.path.join("images","Other","Track.png"))
 
-GAME_OVER = pygame.image.load("images\\Other\\GameOver.png")
+GAME_OVER = pygame.image.load(os.path.join("images","Other","GameOver.png"))
 
-RESET = pygame.image.load("images\\Other\\Reset.png")
+RESET = pygame.image.load(os.path.join("images","Other","Reset.png"))
 
 class Dinosaur:
     X_POS = 80
