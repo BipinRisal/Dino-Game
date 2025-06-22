@@ -303,7 +303,7 @@ def menu():
         quitFont = pygame.font.Font('freesansbold.ttf', 20)
         
         if DEATH_COUNT == 0:
-            text = font.render("Press any Key to Start", True, (0, 0, 0))
+            text = font.render("Press UP Key to Start", True, (0, 0, 0))
             quit = quitFont.render("Press ESCAPE to quit", True, (0,0,0))
             SCREEN.blit(RUNNING[0], (SCREEN_WIDTH // 2  - 30, SCREEN_HEIGHT // 2 - 140))
         elif DEATH_COUNT > 0:
