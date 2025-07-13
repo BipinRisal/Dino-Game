@@ -335,6 +335,7 @@ def menu():
     while run:
         SCREEN.fill((255,255,255))
         font = pygame.font.Font('freesansbold.ttf', 30)
+        leaderboard_font = pygame.font.Font('freesansbold.ttf', 20)
         resetRect = RESET.get_rect()
         if DEATH_COUNT == 0:
             text = font.render("Press UP Key to Start", True, (0, 0, 0))
@@ -366,12 +367,12 @@ def menu():
             resetRect.topleft = (SCREEN_WIDTH // 2 - 35, SCREEN_HEIGHT // 2 - 135)
             SCREEN.blit(RESET,resetRect)       
             
-            leaderboard_title = font.render("Leaderboard:", True, (0, 0, 0))
+            leaderboard_title = leaderboard_font.render("Leaderboard:", True, (0, 0, 0))
             SCREEN.blit(leaderboard_title, (50, 50))
             leaderboard = load_leaderboard_sqlite()
 
             for i, (name, score) in enumerate(leaderboard):
-                entry_text = font.render(f"{i+1}. {name} - {score}", True, (0, 0, 0))
+                entry_text = leaderboard_font.render(f"{i+1}. {name} - {score}", True, (0, 0, 0))
                 SCREEN.blit(entry_text, (50, 90 + i * 30))
            
         quitTextRect = quitText.get_rect()
