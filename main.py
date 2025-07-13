@@ -1,10 +1,11 @@
 import random
 import pygame
 import os
+import sqlite3
 pygame.init()
 pygame.mixer.init()
 
-
+player_name = ""
 HIGH_SCORE = 0
 DEATH_COUNT = 0
 SCREEN_HEIGHT = 700
@@ -46,6 +47,35 @@ TRACK = pygame.image.load(os.path.join("images","Other","Track.png"))
 GAME_OVER = pygame.image.load(os.path.join("images","Other","GameOver.png"))
 
 RESET = pygame.image.load(os.path.join("images","Other","Reset.png"))
+
+def init_db():
+    conn = sqlite3.connect("leaderboard.db")
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS leaderboard (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            score INTEGER NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def save_score_sqlite(name, score):
+    conn = sqlite3.connect("leaderboard.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO leaderboard (name, score) VALUES (?, ?)", (name, score))
+    conn.commit()
+    conn.close()
+    
+def load_leaderboard_sqlite(limit=5):
+    conn = sqlite3.connect("leaderboard.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT name, score FROM leaderboard ORDER BY score DESC LIMIT ?", (limit,))
+    results = cursor.fetchall()
+    conn.close()
+    return results
+
 
 class Dinosaur:
     X_POS = 80
@@ -212,7 +242,7 @@ def main():
     obstacles = []
     
     def score():
-        global points, game_speed, HIGH_SCORE
+        global points, game_speed, HIGH_SCORE,player_name
         points += 1
         if(points % 100 == 0): 
             game_speed += 1.1
@@ -223,7 +253,8 @@ def main():
         if points % 100 == 0:
             POINT_SOUND.play()
 
-
+        name_text = font.render(player_name, True, (0, 0, 0))
+        SCREEN.blit(name_text, (30, 15))  
         text = font.render(str(points), True, (0,0,0))
         high_score = font.render("HI: "+ str(HIGH_SCORE), True, (0,0,0))
         high_score_rect = high_score.get_rect();
@@ -283,6 +314,7 @@ def main():
     
                 pygame.display.update()
                 pygame.time.delay(1000)
+                save_score_sqlite(player_name, points)
                 DEATH_COUNT += 1
                 menu()
         
@@ -296,23 +328,32 @@ def main():
         pygame.display.update()
         
 def menu():
-    global points,DEATH_COUNT,HIGH_SCORE
+    global points,DEATH_COUNT,HIGH_SCORE,player_name
+    input_text = ""
+    input_active = True if DEATH_COUNT == 0 and player_name == "" else False
     run = True
     while run:
         SCREEN.fill((255,255,255))
         font = pygame.font.Font('freesansbold.ttf', 30)
-        quitFont = pygame.font.Font('freesansbold.ttf', 20)
-        
+        resetRect = RESET.get_rect()
         if DEATH_COUNT == 0:
             text = font.render("Press UP Key to Start", True, (0, 0, 0))
-            quit = quitFont.render("Press ESCAPE to quit", True, (0,0,0))
+            quitText = font.render("QUIT",True,(0,0,0))
             SCREEN.blit(RUNNING[0], (SCREEN_WIDTH // 2  - 30, SCREEN_HEIGHT // 2 - 140))
+            if player_name == "":
+                input_font = pygame.font.Font('freesansbold.ttf', 25)
+                input_prompt = input_font.render("Enter your name:", True, (0, 0, 0))
+                SCREEN.blit(input_prompt, (SCREEN_WIDTH//2 - 100, SCREEN_HEIGHT//2 - 300))
+                input_box = pygame.Rect(SCREEN_WIDTH//2 - 150, SCREEN_HEIGHT//2 - 250, 300, 40)
+                pygame.draw.rect(SCREEN, (200, 200, 200), input_box)
+                name_surface = input_font.render(input_text, True, (0, 0, 0))
+                SCREEN.blit(name_surface, (input_box.x + 10, input_box.y + 5))
         elif DEATH_COUNT > 0:
-            text = font.render("Press UP key to Restart", True, (0, 0, 0))
+            text = font.render("Press UP Key to Restart", True, (0, 0, 0))
             score = font.render("Score: " + str(points), True, (0, 0, 0))
             attempt = font.render("Deaths: " + str(DEATH_COUNT), True, (0, 0, 0))
             highScore = font.render("High Score: " + str(HIGH_SCORE), True, (0,0,0))
-            quit = quitFont.render("Press ESCAPE to quit", True, (0,0,0))
+            quitText = font.render("QUIT",True,(0,0,0))
             scoreRect = score.get_rect()
             scoreRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)                          
             SCREEN.blit(score, scoreRect)
@@ -322,22 +363,45 @@ def menu():
             highScoreRect = highScore.get_rect()
             highScoreRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 130)
             SCREEN.blit(highScore,highScoreRect)  
-            SCREEN.blit(RESET,(SCREEN_WIDTH // 2 - 35, SCREEN_HEIGHT // 2 - 135))                                  
-        quitRect = quit.get_rect()
-        quitRect.center = (SCREEN_WIDTH//2, SCREEN_HEIGHT - 20)
-        SCREEN.blit(quit, quitRect)
+            resetRect.topleft = (SCREEN_WIDTH // 2 - 35, SCREEN_HEIGHT // 2 - 135)
+            SCREEN.blit(RESET,resetRect)       
+            
+            leaderboard_title = font.render("Leaderboard:", True, (0, 0, 0))
+            SCREEN.blit(leaderboard_title, (50, 50))
+            leaderboard = load_leaderboard_sqlite()
+
+            for i, (name, score) in enumerate(leaderboard):
+                entry_text = font.render(f"{i+1}. {name} - {score}", True, (0, 0, 0))
+                SCREEN.blit(entry_text, (50, 90 + i * 30))
+           
+        quitTextRect = quitText.get_rect()
+        quitTextRect.center = (SCREEN_WIDTH//2, SCREEN_HEIGHT-100)
+        SCREEN.blit(quitText,quitTextRect)
         textRect = text.get_rect()
         textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         SCREEN.blit(text, textRect)
         pygame.display.update()
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE) or (event.type == pygame.MOUSEBUTTONDOWN and quitTextRect.collidepoint(event.pos)):
                 run = False
                 pygame.quit()
-            if event.type == pygame.KEYDOWN and event.key==pygame.K_UP:
-                main()
+                return 
 
+            if input_active and event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    if input_text.strip() != "":
+                        player_name = input_text.strip()
+                        input_active = False
+                elif event.key == pygame.K_BACKSPACE:
+                    input_text = input_text[:-1]
+                else:
+                    if len(input_text) < 20:
+                        input_text += event.unicode
 
+            elif not input_active:
+                if (event.type == pygame.KEYDOWN and event.key == pygame.K_UP) or (event.type == pygame.MOUSEBUTTONDOWN and resetRect.collidepoint(event.pos)):
+                    main()
+
+init_db()
 menu()
 pygame.quit()
-
